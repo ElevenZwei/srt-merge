@@ -1,0 +1,19 @@
+{
+  "name": "srt-merge",
+  "version": "1.0.0",
+  "description": "merge two srt files into one.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElevenZwei/srt-merge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ElevenZwei/srt-merge/issues"
+  },
+  "homepage": "https://github.com/ElevenZwei/srt-merge#readme"
+}
