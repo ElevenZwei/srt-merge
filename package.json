@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/ElevenZwei/srt-merge/issues"
   },
-  "homepage": "https://github.com/ElevenZwei/srt-merge#readme"
+  "homepage": "https://github.com/ElevenZwei/srt-merge#readme",
+  "dependencies": {
+    "subtitle": "^2.0.0"
+  }
 }
