@@ -19,7 +19,7 @@ argv.reverse();
 const files = [argv.pop(), argv.pop()];
 let srts = files.map(file => fs.readFileSync(file, 'utf-8'));
 let attr = undefined;
-if(argv[argv.length - 1] !== '-o') {
+if(argv[argv.length - 1][0] !== '-') {
   attr = argv.pop();
 }
 let output = undefined;
