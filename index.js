@@ -1,6 +1,6 @@
 const Subtitle = require('subtitle');
 
-function merge(srtPrimary, srtSecondary, attr, noString) {
+function merge(srtPrimary, srtSecondary, attrs, noString) {
   if (typeof srtPrimary === 'string') {
     srtPrimary = Subtitle.parse(srtPrimary);
   }
@@ -8,43 +8,64 @@ function merge(srtPrimary, srtSecondary, attr, noString) {
     srtSecondary = Subtitle.parse(srtSecondary);
   }
   if (typeof srtPrimary !== 'object' || typeof srtSecondary !== 'object') {
-    console.error('cannot parse srt file');
-    return;
+    throw new Error('cannot parse srt file');
   }
-  if(attr) { attr = attr.trim(); }
-  if (attr === 'top-bottom') {
-    srtPrimary = clearPosition(srtPrimary);
-    srtSecondary = clearPosition(srtSecondary);
-    srtSecondary.forEach(caption => {
-      caption.text = '{\\an8}' + caption.text;
+  if(attrs) {
+    if (typeof attrs === 'string') { attrs = [attrs]; }
+    // top-bottom and move-merge must be performed before nearest-cue, so here is a sort
+    attrs.sort((attr1, attr2) => {
+      const order = ['s', 't', 'm', 'n'];
+      return order.indexOf(attr1[0]) - order.indexOf(attr2[0]);
     });
-  } else if (/^nearest-cue-[0-9]+$/.test(attr)) {
-    const threshold = parseInt(attr.substring(attr.lastIndexOf('-') + 1));
-    const srtPrimaryTimeArray = srtPrimary.map(caption => caption.start);
-    // try to merge srtSecondary into srtPrimary, failed captions stay in srtSecondary
-    srtPrimary = copySrt(srtPrimary);
-    srtSecondary = srtSecondary.map(caption => {
-      let index = binarySearch(caption.start, srtPrimaryTimeArray);
-      if (index === -1) {
-        if (srtPrimary[0].start - caption.start <= threshold) {
-          srtPrimary[0].text = srtPrimary[0].text + '\n' + caption.text;
-        } else { return caption; }
-      } else if (caption.start - srtPrimary[index].start <= threshold) {
-        srtPrimary[index].text = srtPrimary[index].text + '\n' + caption.text;
-      } else if (index === srtPrimary.length - 1) {
-        return caption;
-      } else if (srtPrimary[index + 1].start - caption.start <= threshold) {
-        srtPrimary[index + 1].text = srtPrimary[index + 1].text + '\n' + caption.text;
-      } else {
-        return caption;
+    attrs.forEach(attr => {
+      if (attr) { attr = attr.trim(); }
+      if (attr === 'top-bottom') {
+        srtPrimary = clearPosition(srtPrimary);
+        srtSecondary = clearPosition(srtSecondary);
+        srtSecondary.forEach(caption => {
+          caption.text = '{\\an8}' + caption.text;
+        });
+      } else if (/^nearest-cue-[0-9]+(-no-append)?$/.test(attr)) {
+        const threshold = parseInt(attr.substring(attr.lastIndexOf('cue-') + 4));
+        const srtPrimaryTimeArray = srtPrimary.map(caption => caption.start);
+        const noAppend = attr.indexOf('-no-append') > -1;
+        const append = function(captionA, captionB) {
+          if(noAppend) {
+            captionB.start = captionA.start;
+            if(Math.abs(captionB.end - captionA.end) <= threshold) {
+              captionB.end = captionA.end;
+            }
+            return captionB;
+          } else {
+            captionA.text = captionA.text + '\n' + captionB.text;
+            return undefined;
+          }
+        };
+        // try to merge srtSecondary into srtPrimary, failed captions stay in srtSecondary
+        srtPrimary = copySrt(srtPrimary);
+        srtSecondary = srtSecondary.map(caption => {
+          let index = binarySearch(caption.start, srtPrimaryTimeArray);
+          if (index === -1) {
+            if (srtPrimary[0].start - caption.start <= threshold) {
+              return append(srtPrimary[0], caption);
+            } else { return caption; }
+          } else if (caption.start - srtPrimary[index].start <= threshold) {
+            return append(srtPrimary[index], caption);
+          } else if (index === srtPrimary.length - 1) {
+            return caption;
+          } else if (srtPrimary[index + 1].start - caption.start <= threshold) {
+            return append(srtPrimary[index+1], caption);
+          } else {
+            return caption;
+          }
+        }).filter(caption => (caption !== undefined));
+      } else if (/^move-[-]?[0-9]+$/.test(attr)) {
+        const delay = parseInt(attr.substring(attr.lastIndexOf('e-') + 2));
+        srtSecondary = Subtitle.resync(srtSecondary, delay);
+      } else if (attr !== undefined && attr !== 'simple' && attr !== '') {
+        throw new Error('Cannot parse attr');
       }
-    }).filter(caption => (caption !== undefined));
-  } else if (/^move-merge-[-]?[0-9]+$/.test(attr)) {
-    const delay = parseInt(attr.substring(attr.lastIndexOf('e') + 2));
-    srtSecondary = Subtitle.resync(srtSecondary, delay);
-  } else if (attr !== undefined && attr !== 'simple' && attr !== '') {
-    console.error('Cannot parse attr');
-    return;
+    });
   }
   let srt3 = srtPrimary.concat(srtSecondary);
   srt3.sort((caption1, caption2) => {
