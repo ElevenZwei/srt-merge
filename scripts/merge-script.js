@@ -1,4 +1,4 @@
-const SrtMerge = require('./index');
+const SrtMerge = require('../index');
 const fs = require('fs');
 const readLine = require('readline');
 const rl = readLine.createInterface({
@@ -6,7 +6,7 @@ const rl = readLine.createInterface({
   output: process.stdout
 });
 
-if(process.argv.length < 3) {
+if(process.argv.length < 3 || process.argv[2] === '--help' || process.argv[2] === '-h') {
   console.log('Usage:');
   console.log('node ' + __filename.substring(Math.max(__filename.lastIndexOf("\\"), __filename.lastIndexOf("/")) + 1)
     + ' <srtFilepath 1> <srtFilepath 2> [<attr>] [-o [-f(force)] <outputFilepath>]');
@@ -36,24 +36,26 @@ if(output) {
   if(fs.existsSync(output)) {
     if (force) {
       fs.writeFileSync(output, result);
-      console.log('Successfully written.')
+      console.log('Successfully written.');
+      process.exit();
     } else {
-      rl.question('file ' + output + ' already exists, overwrite? y/n', answer => {
+      rl.question('File \'' + output + '\' already exists, overwrite? [y/N] ', answer => {
         answer = answer.toLowerCase();
-        if (answer === 'y' || answer === 'yes') {
+        if (answer[0] === 'y') {
           fs.writeFileSync(output, result);
           console.log('Successfully written.')
         } else {
           console.log('Abort.')
         }
+        process.exit();
       });
     }
   } else {
     fs.writeFileSync(output, result);
-    console.log('Successfully written.')
+    console.log('Successfully written.');
+    process.exit();
   }
 } else {
   console.log(result);
+  process.exit();
 }
-
-process.exit();
