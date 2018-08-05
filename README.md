@@ -1,9 +1,9 @@
 Srt-merge is a tiny node.js project, with just a hundred lines of code.  
-It can merge two srt files into one with a few options.
-##Usage
+It can merge two srt files into one with a few options.  
+## Usage
 There is a usage example in example.js. Run it for a clear understanding.  
 It provides just one function.  
-###merge(srtPrimary, srtSecondary\[, attr, noString])
+### merge(srtPrimary, srtSecondary\[, attr, noString])
 __srtPrimary__ and __srtSecondary__ accept srt-string, or srt-object with the format of [npm-module subtitle](https://www.npmjs.com/package/subtitle).  And they will not be changed in this function.  
 __attr__ accepts one of the following values, __or an array of them__, but the order will always be top-bottom, move, then nearest-cue:
 
