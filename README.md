@@ -1,5 +1,6 @@
 Srt-merge is a tiny node.js project, with just a hundred lines of code.  
 It can merge two srt files into one with a few options.  
+Top-Bottom feature is very suitable for foreign language learners.
 # Usage
 There is a usage example in __example.js__. Run it for a clear understanding.  
 It provides just one function.  
