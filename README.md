@@ -48,14 +48,14 @@ Attribute inputs and corresponding effects:
 
 ## By Bash
 These JS Scripts read options from command line and output to stdout by default. They are helpful in writing bash scripts.
+Use 'yarn build' to build them, which requires 'yarn global add browserify'.
 
-### merge-script.js
+### build/srt-merge.js
 This can only accept one __attr__, not an array of them. When __-o \<out-file>__ is not specified, it will output to __stdout__. __-f__ option means overwrite existing file without prompt. Both input srt files must be text files encoded in utf-8. 
-You need put "merge.js" in the same folder or its parent folder for it to work.
 Piping is under construction.
 
 ``` bash
-./merge-script.js <srt-file-1> [<srt-file-2>] [<one-attr>] [-o [-f(force)] <output Filepath>]  
+./srt-merge.js <srt-file-1> [<srt-file-2>] [<one-attr>] [-o [-f(force)] <output Filepath>]
 ```
 
 ## Practical Example
@@ -90,7 +90,7 @@ ffmpeg -stats -v error -i "xxx.mkv" -map 0:12 "xxx jpn.srt"
 Then use this project to merge them.
 
 ``` bash
-./merge-script.js "xxx eng.srt" "xxx jpn.srt" top-bottom -o "xxx merged.srt"
+./srt-merge.js "xxx eng.srt" "xxx jpn.srt" top-bottom -o "xxx merged.srt"
 ```
 
 Now, combine these processes into one script.
@@ -103,7 +103,7 @@ Get-ChildItem ./ *.mkv | ForEach-Object {
     ffmpeg -stats -v error -i $_.Name -map 0:10 $srt1
     ffmpeg -stats -v error -i $_.Name -map 0:12 $srt2
     $srt3 = $_.BaseName + ' eng_jpn.srt'
-    node /path/to/merge-script.js $srt1 $srt2 top-bottom -o $srt3
+    node /path/to/srt-merge.js $srt1 $srt2 top-bottom -o $srt3
 }
 Get-ChildItem ./ '* eng.srt' | Remove-Item
 Get-ChildItem ./ '* jpn.srt' | Remove-Item

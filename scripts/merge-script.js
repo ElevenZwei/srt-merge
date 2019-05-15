@@ -7,18 +7,7 @@ const rl = readLine.createInterface({
   input: process.stdin,
   output: process.stdout
 });
-
-let SrtMerge;
-let path1 = path.join(path.dirname(__filename), 'merge.js'),
-    path2 = path.join(path.dirname(__filename), '..', 'merge.js');
-if(fs.existsSync(path1)) {
-  SrtMerge = require(path1);
-} else if (fs.existsSync(path2)) {
-  SrtMerge = require(path2);
-} else {
-  console.log("You need to place file \"merge.js\" within the same folder or its parent folder.")
-  process.exit(1);
-}
+const SrtMerge = require('../merge');
 
 if(process.argv.length < 3 || process.argv[2] === '--help' || process.argv[2] === '-h') {
   console.log('Usage:');
