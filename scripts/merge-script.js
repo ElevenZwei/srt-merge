@@ -2,16 +2,19 @@
 
 const fs = require('fs');
 const readLine = require('readline');
+const path = require('path');
 const rl = readLine.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
 let SrtMerge;
-if(fs.existsSync('./merge.js')) {
-  SrtMerge = require('./merge.js');
-} else if (fs.existsSync('../merge.js')) {
-  SrtMerge = require('../merge');
+let path1 = path.join(path.dirname(__filename), 'merge.js'),
+    path2 = path.join(path.dirname(__filename), '..', 'merge.js');
+if(fs.existsSync(path1)) {
+  SrtMerge = require(path1);
+} else if (fs.existsSync(path2)) {
+  SrtMerge = require(path2);
 } else {
   console.log("You need to place file \"merge.js\" within the same folder or its parent folder.")
   process.exit(1);
@@ -19,8 +22,7 @@ if(fs.existsSync('./merge.js')) {
 
 if(process.argv.length < 3 || process.argv[2] === '--help' || process.argv[2] === '-h') {
   console.log('Usage:');
-  console.log('\t' + __filename.substring(Math.max(__filename.lastIndexOf("\\"), __filename.lastIndexOf("/")) + 1)
-    + ' <srtFilepath 1> [<srtFilepath 2>] [<one-attr>] [-o [-f(force)] <outputFilepath>]');
+  console.log('\t' + path.extname(__filename) + ' <srtFilepath 1> [<srtFilepath 2>] [<one-attr>] [-o [-f(force)] <outputFilepath>]');
   console.log('Description:');
   console.log('\tSrt 2 will be processed by given attributes and merged into Srt 1.');
   console.log('Attributes available:');
