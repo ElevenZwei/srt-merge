@@ -1,4 +1,5 @@
-const SrtMerge = require('../index');
+#!/usr/bin/node
+
 const fs = require('fs');
 const readLine = require('readline');
 const rl = readLine.createInterface({
@@ -6,18 +7,43 @@ const rl = readLine.createInterface({
   output: process.stdout
 });
 
+let SrtMerge;
+if(fs.existsSync('./merge.js')) {
+  SrtMerge = require('./merge.js');
+} else if (fs.existsSync('../merge.js')) {
+  SrtMerge = require('../merge');
+} else {
+  console.log("You need to place file \"merge.js\" within the same folder or its parent folder.")
+  process.exit(1);
+}
+
 if(process.argv.length < 3 || process.argv[2] === '--help' || process.argv[2] === '-h') {
   console.log('Usage:');
-  console.log('node ' + __filename.substring(Math.max(__filename.lastIndexOf("\\"), __filename.lastIndexOf("/")) + 1)
-    + ' <srtFilepath 1> <srtFilepath 2> [<attr>] [-o [-f(force)] <outputFilepath>]');
-  console.log('All files should be encoded with utf-8.');
-  process.exit();
+  console.log('\t' + __filename.substring(Math.max(__filename.lastIndexOf("\\"), __filename.lastIndexOf("/")) + 1)
+    + ' <srtFilepath 1> [<srtFilepath 2>] [<one-attr>] [-o [-f(force)] <outputFilepath>]');
+  console.log('Description:');
+  console.log('\tSrt 2 will be processed by given attributes and merged into Srt 1.');
+  console.log('Attributes available:');
+  console.log('\t1. top-bottom \n\t\t# This will make srt2 showed at top and srt1 showed at bottom.');
+  console.log('\t2. nearest-cue-<time-in-millisecond>[-no-append] \n\t\t# This will append srt2 lines into srt1 lines within given time threshold.');
+  console.log('\t3. move-<time-to-shift> \n\t\t# This will move srt2, number can be positive or negative in milliseconds.');
+  console.log('Input files:');
+  console.log('\tBoth srt files should be encoded in utf-8.');
+  process.exit(0);
 }
 
 let argv = process.argv.slice(2);
 argv.reverse();
 const files = [argv.pop(), argv.pop()];
-let srts = files.map(file => fs.readFileSync(file, 'utf-8'));
+// if second argument is not a existing file, take it as attribute input
+if(!fs.existsSync(files[1])) {
+    argv.push(files[1]);
+    files[1] = files[0];
+    files[0] = '';
+}
+// read files
+let srts = files.map(file => file.trim().length > 0 ? fs.readFileSync(file, 'utf-8') : '');
+
 let attr = undefined;
 if(argv[argv.length - 1][0] !== '-') {
   attr = argv.pop();
@@ -37,7 +63,7 @@ if(output) {
     if (force) {
       fs.writeFileSync(output, result);
       console.log('Successfully written.');
-      process.exit();
+      process.exit(0);
     } else {
       rl.question('File \'' + output + '\' already exists, overwrite? [y/N] ', answer => {
         answer = answer.toLowerCase();
@@ -47,15 +73,15 @@ if(output) {
         } else {
           console.log('Abort.')
         }
-        process.exit();
+        process.exit(0);
       });
     }
   } else {
     fs.writeFileSync(output, result);
     console.log('Successfully written.');
-    process.exit();
+    process.exit(0);
   }
 } else {
   console.log(result);
-  process.exit();
+  process.exit(0);
 }

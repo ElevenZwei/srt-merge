@@ -1,61 +1,99 @@
-Srt-merge is a tiny node.js project, with just a hundred lines of code.  
-It can merge two srt files into one with a few options.  
-Top-Bottom feature is very suitable for foreign language learners.
+# srt-merge
+
+Srt-merge is a small node.js project in one hundred lines.  
+It can merge two srt files into one with some optional options.  
+It can place one subtitle at the top of screen and another one at bottom that is very useful for language learners.  
+
 # Usage
-There is a usage example in __example.js__. Run it for a clear understanding.  
-It provides just one function.  
+
+You can use this tool in __Nodejs__ or in __Bash__ scripts.  
+First, __npm install__ or __yarn__ to install dependencies.
+
+## By JS Code
+
+Examples are in __example.js__. Read and run it for a clear understanding.
+
+This project contains one file __merge.js__, one function __merge()__.  
+
 ## merge(srtPrimary, srtSecondary\[, attr, noString])
-__srtPrimary__ and __srtSecondary__ accept srt-string, or srt-object with the format of [npm-module subtitle](https://www.npmjs.com/package/subtitle).  And they will not be changed in this function.  
-__attr__ accepts one of the following values, __or an array of them__, but the performing order will always be top-bottom, move, then nearest-cue:
 
-* __\<empty string\>, \<undefined\>, simple__  
-Simply merge two files.
-* __top-bottom__  
-srtPrimary at bottom, srtSecondary at top.  
-Using ass tag __{\an8}__ which is supported by many players.
-* __nearest-cue-*\<threshold\>*\[-no-append]__  
-srtSecondary will be appended to srtPrimary with a start time threshold. If there are multiple cues, it chooses the earliest.  
-__no-append__ means srtSecondary will only be aligned with srtPrimary with a start time threshold. These two, which start time are aligned, their end time will also be aligned if they are within the threshold.
- 
-* __move-*\<time shifted\>*__
-srtSecondary will be shifted (can be forward or backward) and merged into srtPrimary.  
+__srtPrimary__ and __srtSecondary__ accept srt-string, or srt-object in the format of [npm-module subtitle](https://www.npmjs.com/package/subtitle). They will not be modified by this function.
 
-__noString__ takes true or false, if it's true, output the srt-object, otherwise output srt text.  
-If you only want to edit one file, simply leave the srtPrimary with an empty string.
+__attr__ accepts one of the following values, __or an array of them__. They describe transformations performed on __srtSecondary__ before it is merge into __srtPrimary__. The action priority will always be "top-bottom", "move", then "nearest-cue".
 
-# Testing
-I haven't make any test. So if you find something strange, please leave a message.
+Attribute inputs and corresponding effects:
 
-# Scripts
-In folder /scripts are some scripts which reads command line arguments. They are great tools when writing shell scripts.
-## Files
+1. __\<empty string> or \<undefined> or "simple"__
+
+   Simply merge two files.
+
+1. __top-bottom__
+
+   Place srtPrimary at video bottom, srtSecondary at video top, using ass-file-format tag __{\an8}__ in srt-file output. This feature is supported by many video players including VLC, MPC-HC.
+
+1. __nearest-cue-*\<threshold>*\[-no-append]__
+
+   Cues in srtSecondary will be appended to corresponding cues in srtPrimary if the difference of their start time is no larger than the given threshold. If srtSecondary has multiple cues within the threshold, srtPrimary will append the earliest one.
+
+   __no-append__ means srtSecondary will only be aligned with srtPrimary within a start time threshold. Whose start time are aligned, whose end time will also be aligned if they are within the threshold.
+
+1. __move-*\<time shifted\>*__
+
+   srtSecondary will be shifted (can be forward or backward) and merged into srtPrimary.
+
+   __noString__ takes true or false, if it's true, output the srt-object, otherwise output srt text.
+
+ If you only want to edit one file, leave the __srtPrimary__(not srtSecondary) with an empty string.
+
+
+## By Bash
+These JS Scripts read options from command line and output to stdout by default. They are helpful in writing bash scripts.
+
 ### merge-script.js
-#### Usage
-It only accepts one __attr__.  
-If __output__ is not specified, it will print to console.log.  
-__Force__ flag means overwrite without questioning.
+This can only accept one __attr__, not an array of them. When __-o \<out-file>__ is not specified, it will output to __stdout__. __-f__ option means overwrite existing file without prompt. Both input srt files must be text files encoded in utf-8. 
+You need put "merge.js" in the same folder or its parent folder for it to work.
+Piping is under construction.
 
-    node merge-script.js <srt Filepath 1> <srt Filepath 2> [<attr>] [-o [-f(force)] <output Filepath>]  
-## Scripts Example
-Examples here are on windows platform.
-### Extracting subtitles from mkv file and merge
-First, use [__ffmpeg__](https://www.ffmpeg.org/) to check on which track is the subtitle you want.
-  
+``` bash
+./merge-script.js <srt-file-1> [<srt-file-2>] [<one-attr>] [-o [-f(force)] <output Filepath>]  
+```
+
+## Practical Example
+
+Examples have been tested on Windows.
+
+### Extracting multiple subtitles from an mkv file and merge them into one
+First, use [__ffmpeg__](https://www.ffmpeg.org/) to check which track is the subtitle you want.  
+
 ```bash
 ffmpeg -i <your_mkv_file>
 ```
 
 You will see something like:
 
-    Stream #0:10(eng): Subtitle: subrip
-    Metadata:
-      title           : English [Forced]
-    
-Which means subtitle __English\[Forced]__ is on track 0:10. You can use this to extract.
-    
-    ffmpeg -stats -v error -i <your_mkv_file> -map <track(0:10)> <output_file(eng.srt)>
-     
-Now we need to automate it. 
+>    Stream #0:10(eng): Subtitle: subrip  
+>    Metadata:  
+>      title           : English [Forced]
+
+That means subtitle __English\[Forced]__ is on track 0:10. __-map__ option is used to extract it.
+
+``` bash
+ffmpeg -stats -v error -i <your_mkv_file> -map <track(here is 0:10)> <output_file(eng.srt)>
+```
+
+In the same way you can extract JPN subtitles.
+
+``` bash
+ffmpeg -stats -v error -i "xxx.mkv" -map 0:12 "xxx jpn.srt"
+```
+
+Then use this project to merge them.
+
+``` bash
+./merge-script.js "xxx eng.srt" "xxx jpn.srt" top-bottom -o "xxx merged.srt"
+```
+
+Now, combine these processes into one script.
 
 ```PowerShell
 // Powershell
@@ -71,5 +109,3 @@ Get-ChildItem ./ '* eng.srt' | Remove-Item
 Get-ChildItem ./ '* jpn.srt' | Remove-Item
 ```
 
-   
- 
