@@ -646,15 +646,15 @@ const SrtMerge = require('../merge');
 
 if(process.argv.length < 3 || process.argv[2] === '--help' || process.argv[2] === '-h') {
   console.log('Usage:');
-  console.log('\t' + path.extname(__filename) + ' <srtFilepath 1> [<srtFilepath 2>] [<one-attr>] [-o [-f(force)] <outputFilepath>]');
+  console.log('  ' + path.basename(__filename) + ' <srtFilepath 1> [<srtFilepath 2>] [<one-attr>] [-o [-f(force)] <outputFilepath>]');
   console.log('Description:');
-  console.log('\tSrt 2 will be processed by given attributes and merged into Srt 1.');
+  console.log('  Srt 2 will be processed by given attributes and merged into Srt 1.');
   console.log('Attributes available:');
-  console.log('\t1. top-bottom \n\t\t# This will make srt2 showed at top and srt1 showed at bottom.');
-  console.log('\t2. nearest-cue-<time-in-millisecond>[-no-append] \n\t\t# This will append srt2 lines into srt1 lines within given time threshold.');
-  console.log('\t3. move-<time-to-shift> \n\t\t# This will move srt2, number can be positive or negative in milliseconds.');
+  console.log('  1. top-bottom \n    # This will make srt2 showed at top and srt1 showed at bottom.');
+  console.log('  2. nearest-cue-<time-in-millisecond>[-no-append] \n    # This will append srt2 lines into srt1 lines within given time threshold.');
+  console.log('  3. move-<time-to-shift> \n    # This will move srt2, number can be positive or negative in milliseconds.');
   console.log('Input files:');
-  console.log('\tBoth srt files should be encoded in utf-8.');
+  console.log('  Both srt files should be encoded in utf-8.');
   process.exit(0);
 }
 
