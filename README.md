@@ -2,6 +2,7 @@
 
 Srt-merge is a small node.js project in one hundred lines.  
 It can merge two srt files into one with some optional options.  
+It can shift one srt file at given time to match the video file.  
 It can place one subtitle at the top of screen and another one at bottom that is very useful for language learners.  
 
 # Usage
@@ -60,9 +61,12 @@ Piping is under construction.
 
 ## Practical Example
 
-Examples have been tested on Windows.
-
 ### Extracting multiple subtitles from an mkv file and merge them into one
+
+This example is for Windows.
+
+Suppose you want to show subtitles of two languages at the same time, and now both of them are embedded in an MKV video file. You want to extract them out and combine into one.
+
 First, use [__ffmpeg__](https://www.ffmpeg.org/) to check which track is the subtitle you want.  
 
 ```bash
@@ -108,4 +112,20 @@ Get-ChildItem ./ *.mkv | ForEach-Object {
 Get-ChildItem ./ '* eng.srt' | Remove-Item
 Get-ChildItem ./ '* jpn.srt' | Remove-Item
 ```
+### Shift and rename subtitles
+
+This example is for Linux.
+
+Suppose now you have following subtitle files and videos in one folder.
+
+1. xx01xx.mkv, xx02xx.mkv, xx03xx.mkv
+1. yy01yy_en.srt, yy01yy_jp.srt
+1. yy02yy_en.srt, yy02yy_jp.srt
+1.  yy03yy_en.srt, yy03yy_jp.srt
+
+You want to shift these srt files a few seconds and rename it to match MKV filename.
+
+First, You can use Debian package 'subtitleeditor' - it's a GUI subtitle editor - to check how many seconds to shift. 
+
+
 
